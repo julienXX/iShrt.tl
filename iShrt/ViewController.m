@@ -1,64 +1,40 @@
-//
-//  ViewController.m
-//  iShrt
-//
-//  Created by Julien Blanchard on 06/11/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
-//
+#define shrtBgQueue dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+
+#define shrtURL [NSURL URLWithString: @"http://shrt.tl/v1/analytics?url=http://shrt.tl/"]
 
 #import "ViewController.h"
 
 @implementation ViewController
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Release any cached data, images, etc that aren't in use.
-}
-
-#pragma mark - View lifecycle
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    
+    dispatch_async(shrtBgQueue, ^{
+        NSData* data = [NSData dataWithContentsOfURL: shrtURL];
+        [self performSelectorOnMainThread:@selector(fetchedData:) withObject:data waitUntilDone:YES];
+    });
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-	[super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-	[super viewDidDisappear:animated];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-    } else {
-        return YES;
-    }
+- (void)fetchedData:(NSData *)responseData {
+    //parse out the json data
+    NSError* error;
+    NSDictionary* json = [NSJSONSerialization 
+                          JSONObjectWithData:responseData
+                          
+                          options:kNilOptions 
+                          error:&error];
+    
+    NSArray* hit = [json objectForKey:@"hit"];
+    NSArray* hitFromFacebook = [json objectForKey:@"hit_from_facebook"];
+    
+    NSLog(@"hit: %@", hit);
+    NSLog(@"hit_from_facebook: %@", hitFromFacebook);
+    
+    jsonSummary.text = [NSString stringWithFormat:@"Hits: %@\nHits from Facebook: %@",
+                        [json objectForKey:@"hit"],
+                        [json objectForKey:@"hit_from_facebook"]];
 }
 
 @end
+
