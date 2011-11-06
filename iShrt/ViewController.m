@@ -16,7 +16,8 @@
     });
 }
 
-- (void)fetchedData:(NSData *)responseData {
+- (void)fetchedData:(NSData *)responseData
+{
     //parse out the json data
     NSError* error;
     NSDictionary* json = [NSJSONSerialization 
@@ -34,6 +35,11 @@
     jsonSummary.text = [NSString stringWithFormat:@"Hits: %@\nHits from Facebook: %@",
                         [json objectForKey:@"hit"],
                         [json objectForKey:@"hit_from_facebook"]];
+}
+
+- (void)findResults:(id)sender
+{
+    NSLog(@"touched");
 }
 
 @end

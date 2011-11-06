@@ -12,5 +12,9 @@
 @interface ViewController : UIViewController {
     IBOutlet UITextField* shortenedURL;
     IBOutlet UILabel* jsonSummary;
+    IBOutlet UIButton* goButton;
 }
+
+- (IBAction) findResults: (id) sender;
+
 @end
